@@ -1,0 +1,50 @@
+--- 
+ - name: Creating K8S Master
+   hosts: all
+   become: yes
+   gather_facts: false
+
+   tasks:
+   - name: Installing unzip
+     yum: 
+      name: unzip
+      state: latest
+
+   - name: Downloading AWS CLI ZIP FILE
+     get_url:
+      url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+      dest: /home/centos/
+
+   - name: Unziping AWS CLI
+     unarchive:
+       src: /home/centos/awscli-exe-linux-x86_64.zip
+       dest: /home/centos/
+       remote_src: yes
+
+   - name: Installing AWS CLI
+     command: ./aws/install --update
+
+   - name: Downloading KUBECTL
+     get_url:
+      url: https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl
+      dest: /usr/local/bin/kubectl
+      
+   - name: Executing kubectl
+     command: chmod +x /usr/local/bin/kubectl  
+
+   - name: Downloading KOPS
+     get_url:
+      url: https://github.com/kubernetes/kops/releases/download/v1.20.0/kops-linux-amd64
+      dest: /usr/local/bin/kops
+      
+   - name: Executing Kops 
+     command: chmod +x /usr/local/bin/kops
+
+   - name: Generate key
+     openssh_keypair:
+        path: /home/centos/.ssh/id_rsa
+        state: present
+
+   - name: create k8s cluster
+     shell: /usr/local/bin/kops create cluster --state=s3://nalini-k8s --zones=eu-west-2a,eu-west-2b --node-count=2 --name=nalinimaster.k8s.local --yes --ssh-public-key /home/centos/.ssh/id_rsa.pub
+...
