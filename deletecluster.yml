@@ -1,0 +1,10 @@
+---
+ - name: Deleting K8S cluster
+   hosts: all
+   become: yes
+   gather_facts: false
+
+   tasks:
+   - name: Deleting k8s cluster
+     shell: /usr/local/bin/kops delete cluster --state=s3://nalini-k8s --name=nalinimaster.k8s.local --yes
+...
